@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title><%= title %></title>
+    <link rel="stylesheet" href="/libs/css/jquery.terminal-2.39.3.min.css"/>
+    <link href="/libs/css/bootstrap-5.3.3.min.css" rel="stylesheet">
+
+    <link href="./css/index.css" rel="stylesheet">
+
+    <!-- -->
+  <script type="module">
+    import Autocomplete from "/libs/js/bootstrap5-autocomplete-autocomplete.min.js";
+
+    let servers = (await $.ajax({ url: './servers/get', type: 'GET' })).servers;
+    let src = servers.map(srv => ({ label: srv.hostname, title: srv.hostname, data: { host: srv.hostname, port: srv.port, version: srv.version }}));
+    console.log('src:', src)
+
+    new Autocomplete(document.getElementById("connectAccountHost"), {
+      items: src,
+      valueField: "id",
+      labelField: "title",
+      highlightTyped: true,
+      onSelectItem: function(item) {
+        let host = item.data.host;
+        let port = item.data.port;
+        let version = item.data.version;
+        $('#connectAccountHost').val(host);
+        $('#connectAccountPort').val(port);
+        $('#connectAccountVersion').val(version);
+      },
+    });
+  </script>
+    <!-- -->
+
+  </head>
+  <body>
+
+  <nav id="navigation" class="navbar navbar-expand-sm bg-dark py-0" data-bs-theme="dark" style="border-bottom: 1px solid steelblue; box-shadow: 0 7px 6px -5px steelblue">
+    <div class="container-fluid">
+      <span class="navbar-brand py-0" href="#" style="font-size: 16px">MinePrompt</span>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navigation-nav" aria-controls="navigation-nav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navigation-nav">
+        <ul class="navbar-nav me-auto mb-2 mb-sm-0">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Accounts
+            </a>
+            <ul class="dropdown-menu" style="min-width: 250px">
+              <li><a class="dropdown-item" href="#account_add" data-bs-toggle="modal">&plus; Add Account</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <div id="navbarAccounts"></div>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Servers
+            </a>
+            <ul class="dropdown-menu" style="min-width: 250px">
+              <!--
+              <li><a class="dropdown-item" href="#account_add" data-bs-toggle="modal">&plus; Add Server</a></li>
+              <li><hr class="dropdown-divider"></li>
+            -->
+              <div id="navbarServers"></div>
+            </ul>
+          </li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              Modules
+            </a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Under Construction</a></li>
+            </ul>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">Settings</a>
+          </li>
+
+        </ul>
+        <span class="navbar-text py-0">
+          MinePrompt [Edition] v0.0.1
+        </span>
+      </div>
+    </div>
+  </nav>
+
+    <div class="alert alert-info alert-dismissible m-2" role="alert" style="background-color: rgba(70,130,180, .75); color: #fff">
+      Notice &raquo; You are using an early release of MinePrompt
+      <a href="https://github.com/Pix3lPirat3/mineprompt_control" target="_blank" style="color: white;">[Check for Updates]</a>
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div id="terminals" class="mx-3 mt-2">
+
+        <div class="row">
+            <div class="col-12 col-sm-6 p-0 px-1" id="player-card" style="display: none;">
+                <div class="card p-3 pb-0 mb-2">
+                    <div class="d-flex justify-content-between" style="height: 65px;"> <!-- 65 for consistency when potion effects applied -->
+                        <div class="d-flex flex-row align-items-center">
+                            <div class="icon">
+                              <img class="avatar-head" height="50px" src="#">
+                              <img class="avatar-body" height="50px" src="#">
+                            </div>
+                            <div>
+                              <div class="ms-2 c-details">
+                                <div class="mb-0">
+                                  <div data-fill="username" style="line-height: 16px;">Placeholder</div>
+                                </div>
+                                <div style="font-size: 10px; line-height: 16px;">
+                                  <div class="position">0, 0, 0</div>
+                                </div>
+                                <div style="font-size: 10px; line-height: 16px;">
+                                  <div style=""></div> <!-- Possibility of a 3rd line -->
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                        <div class="badge" style="text-align: left;">
+                          <div class="health">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                            <img src="./imgs/hearts/heart-empty.png">
+                          </div>
+                          <div class="hunger">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                            <img src="./imgs/hunger/hunger-empty.webp">
+                          </div>
+                          <div class="effects" style="margin-top: 2.5px">
+                            
+                          </div>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <!-- Inventory -->
+                        <div class="terminal" style="height: 250px; background: transparent; box-shadow: 1px 1px 5px rgb(30, 31, 34) inset; border: 1px solid rgb(30, 31, 34); border-bottom: none; border-top-right-radius: 10px; border-top-left-radius: 10px;"></div>
+                        <!-- !Inventory -->
+
+                        <div class="module-icons">
+
+                        </div>
+                        <div class="runtime" style="font-size: 10px; float: right; margin-right: 5px; border-radius: 10px; height: 15px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="account_add" data-bs-theme="dark" tabindex="-1" aria-labelledby="accountAddLabel" aria-hidden="true" style="color: #fff">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="accountAddLabel">Add Account</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+
+            <div class="mb-3" style="text-align: center;">
+              <img id="addAccountSkin" src="https://mc-heads.net/body/" style="text-align: center; height: 150px">
+            </div>
+
+            <div id="addAccountErrors" class="mb-2" style="color: indianred;"></div>
+
+            <form id="addAccount">
+              <div class="input-group mb-3">
+                <div class="form-floating">
+                  <input type="text" class="form-control" id="addAccountUsername" placeholder="Username">
+                  <label for="addAccountUsername">Username</label>
+                </div>
+              </div>
+
+              <div class="col-md">
+                <div class="form-floating">
+                  <select class="form-select" id="addAccountAuth">
+                    <option selected value="microsoft">Microsoft</option>
+                    <option value="offline">Offline</option>
+                  </select>
+                  <label for="addAccountAuth">Authentication</label>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button id="addAccountSubmit" type="button" class="btn btn-primary">Add</button>
+            <!-- <button type="button" class="btn btn-primary">Authenticate</button> -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="connectAccount" data-bs-theme="dark" tabindex="-1" aria-labelledby="connectAccountLabel" aria-hidden="true" style="color: #fff">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="connectAccountLabel">Connect</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+
+            <div class="d-flex mb-3" style="text-align: center;">
+              <img class="mx-auto" id="connectAccountHead" src="#" style="text-align: center; height: 150px">
+              <img class="mx-auto" id="connectAccountSkin" src="#" style="text-align: center; height: 150px">
+            </div>
+
+            <form id="connectAccount" class="">
+              <div class="row">
+                <div class="col px-1">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="connectAccountUsername" placeholder="Username">
+                    <label for="connectAccountUsername">Username</label>
+                  </div>
+                </div>
+
+                <div class="col px-1">
+                  <div class="form-floating">
+                    <select class="form-select" id="connectAccountAuth">
+                      <option selected value="microsoft">Microsoft</option>
+                      <option value="offline">Offline</option>
+                    </select>
+                    <label for="connectAccountAuth">Authentication</label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-2">
+                <div class="col px-1">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="connectAccountHost" placeholder="Host">
+                    <label for="connectAccountHost">Host</label>
+                  </div>
+                </div>
+
+                <div class="col px-1">
+                  <div class="form-floating">
+                    <input type="number" class="form-control" id="connectAccountPort" placeholder="Port">
+                    <label for="connectAccountPort">Port</label>
+                  </div>
+                </div>
+
+                <div class="col px-1">
+                  <div class="form-floating">
+                    <input type="text" class="form-control" id="connectAccountVersion" placeholder="Version" value="1.19.2">
+                    <label for="connectAccountVersion">Version</label>
+                  </div>
+                </div>
+
+                <div>
+                  <a id="connectAccountShowAdvancedSettings" href="#" style="float: right;">Advanced Settings</a>
+                </div>
+
+                <div id="connectAccountAdvancedSettings" class="mt-3" style="border-top: 1px solid #495057; display: none;">
+                  <div class="row mt-2">
+
+                    <div class="col px-1">
+                      <div class="form-floating">
+                        <select class="form-select" id="connectAccountViewDistance">
+                          <option selected value="far">Far (12)</option>
+                          <option value="normal">Normal (10)</option>
+                          <option value="short">Short (8)</option>
+                          <option value="tiny">Tiny (6)</option>
+                        </select>
+                        <label for="connectAccountViewDistance">View Distance</label>
+                      </div>
+                    </div>
+
+                    <div class="col px-1">
+                      <div class="form-floating">
+                        <select class="form-select" id="connectAccountRespawn">
+                          <option selected value="true">true</option>
+                          <option value="false">false</option>
+                        </select>
+                        <label for="connectAccountRespawn">Auto Respawn</label>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mt-1">
+                    
+                    <div class="col px-1">
+                      <div class="form-floating">
+                        <input type="text" class="form-control" id="connectAccountFakeHost" placeholder="Fake Host">
+                        <label for="connectAccountFakeHost">Fake Host</label>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
+
+
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button id="connectAccountSubmit" type="button" class="btn btn-primary">Connect</button>
+            <!-- <button type="button" class="btn btn-primary">Authenticate</button> -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-------------------------- -------------------------------------->
+
+    <div class="modal fade" id="minepromptGuide" data-bs-theme="dark" tabindex="-1" aria-labelledby="minepromptGuideLabel" aria-hidden="true" style="color: #fff">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="minepromptGuideLabel">A Guide</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+
+            <div class="mb-3" style="text-align: center;">
+              <img id="addAccountSkin" src="https://mc-heads.net/body/" style="text-align: center; height: 150px">
+            </div>
+
+            <div id="addAccountErrors" class="mb-2" style="color: indianred;"></div>
+
+            <form id="addAccount">
+              <div class="input-group mb-3">
+                <div class="form-floating">
+                  <input type="text" class="form-control" id="addAccountUsername" placeholder="Username">
+                  <label for="addAccountUsername">Username</label>
+                </div>
+              </div>
+
+              <div class="col-md">
+                <div class="form-floating">
+                  <select class="form-select" id="addAccountAuth">
+                    <option selected value="microsoft">Microsoft</option>
+                    <option value="offline">Offline</option>
+                  </select>
+                  <label for="addAccountAuth">Authentication</label>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="position: absolute; bottom: 5px; right: 5px;">
+      <a href='https://ko-fi.com/L4L2TFP22' target='_blank'><img height='40' style='border:0px;height:40px;' src='https://storage.ko-fi.com/cdn/kofi2.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
+    </div>
+
+    <script type="text/javascript" src="/libs/js/jquery-3.7.1.min.js"></script>
+    <script type="text/javascript" src="/libs/js/bootstrap-5.3.3.bundle.min.js"></script>
+    <script type="text/javascript" src="/libs/js/jquery.terminal-2.39.3.min.js"></script>
+    <script type="text/javascript" src="/libs/js/jquery.terminal-2.39.3-unix_formatting.js"></script>
+
+    <script type="text/javascript" src="./js/card/Card.js"></script>
+
+    <script>
+      // let player_card = new Card({
+      //   username: 'MinePrompt',
+      //   auth: 'microsoft',
+      //   host: 'localhost',
+      //   port: '25565',
+      //   version: '1.19.2',
+      //   viewDistance: 'far',
+      //   respawn: 'true',
+      //   fakeHost: 'localhost'
+      // })
+      // player_card.startChild()
+    </script>
+    <script type="text/javascript" src="/libs/js/jquery.pulsate.min.js"></script>
+
+<script type="text/javascript" src="./js/navbar.js"></script>
+
+<script type="text/javascript" src="./js/modals/addAccount.js"></script>
+<script type="text/javascript" src="./js/modals/connectAccount.js"></script>
+
+  </body>
+</html>
