@@ -1,3 +1,8 @@
+# MinePrompt Files
+accounts.json
+test_scripts.js
+servers.json
+
 # Logs
 logs
 *.log
@@ -103,6 +108,9 @@ dist
 # vuepress v2.x temp and cache directory
 .temp
 .cache
+
+# Docusaurus cache and generated files
+.docusaurus
 
 # Serverless directories
 .serverless/
