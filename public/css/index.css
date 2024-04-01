@@ -1,0 +1,82 @@
+* {
+  font-size: 14px;
+}
+
+@font-face {
+    font-family: Faithful32xRegular;
+    src: url("../fonts/Faithful32xRegular.otf") format("opentype");
+}
+
+body {
+  background-color: rgb(49, 51, 56);
+  font-family: 'Faithful32xRegular';
+  background: url("../imgs/backgrounds/minecraft-realistic-river.webp") center / cover no-repeat;
+}
+
+p { background: url("chess.png") 40% / 10em gray  round fixed border-box; } 
+
+.card {
+  background-color: rgba(43, 45, 49, 0.85);
+  border: 1px solid rgba(30, 31, 34, 1);
+  color: rgb(219, 222, 225)!important;
+}
+
+.card .badge > div {
+  font-size: 8px;
+}
+
+.card .health img, .card .hunger img {
+  height: 15px;
+  width: 15px;
+  margin-right: -2.5px;
+}
+
+.card .effects img {
+  height: 20px;
+  width: 20px;
+  margin-right: 2.5px;
+}
+
+.module-icons {
+  height: 25px;
+  border: 1px solid rgb(30, 31, 34);
+  box-shadow: 1px 1px 5px rgb(30, 31, 34) inset;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+.terminal {
+  --size: 0.90; /* TODO: Customization */
+  --link-color: steelblue;
+}
+
+.terminal .cmd:focus-within .prompt * {
+  color: red;
+}
+
+/*#connect-form input, #connect-form select, #connect-form {
+  background-color: rgb(43, 45, 49, 0.90)!important;
+  color: #fff!important;
+  border: none!important;
+}
+
+#connect-form .form-select~label::after {
+  background: #cecece!important;
+}*/
+
+.form-floating>.form-control {
+  height: inherit; /* Patch for hiding the lower bits of letters */
+}
+
+#navigation #navigation-nav > ul > li:nth-child(odd) {
+  background-color: rgba(70, 130, 180, 0.75)!important;
+  color: #fff!important;
+}
+#navigation #navigation-nav .nav-link {
+  padding: 5px 15px;
+  color: #fff;
+}
+
+.modal-body, .modal-dialog, .modal-content {
+  background-color: rgba(43, 45, 49, 0.85)!important;
+  color: rgb(219, 222, 225)!important;
+}
