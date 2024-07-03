@@ -369,25 +369,27 @@
 
     <script type="text/javascript" src="./js/card/Card.js"></script>
 
-    <script>
-      // let player_card = new Card({
-      //   username: 'MinePrompt',
-      //   auth: 'microsoft',
-      //   host: 'localhost',
-      //   port: '25565',
-      //   version: '1.19.2',
-      //   viewDistance: 'far',
-      //   respawn: 'true',
-      //   fakeHost: 'localhost'
-      // })
-      // player_card.startChild()
-    </script>
     <script type="text/javascript" src="/libs/js/jquery.pulsate.min.js"></script>
 
-<script type="text/javascript" src="./js/navbar.js"></script>
+    <script type="text/javascript" src="./js/navbar.js"></script>
 
-<script type="text/javascript" src="./js/modals/addAccount.js"></script>
-<script type="text/javascript" src="./js/modals/connectAccount.js"></script>
+    <script type="text/javascript" src="./js/modals/addAccount.js"></script>
+    <script type="text/javascript" src="./js/modals/connectAccount.js"></script>
+    <script>
+
+      // Check if user already had sessions running, re-render those cards.
+
+      getSession = async function(){
+        let sessions = (await jQuery.getJSON('./process/fetch')).sessions;
+        console.log('getSession:', sessions)
+        sessions.forEach(function(session) {
+          let player_card = new Card(session.env, session.port);
+          player_card.startChild();
+        })
+      }
+      getSession();
+
+    </script>
 
   </body>
 </html>
