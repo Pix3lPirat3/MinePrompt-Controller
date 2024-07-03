@@ -4,12 +4,18 @@
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: process.pid });
 
+let comms = null;
+
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
     let data = JSON.parse(message);
     switch(data.task) {
       case 'command':
         runCommand(data.cmd, data.args)
+        break;
+
+      case 'startBot':
+        startBot()
         break;
       default:
         console.log('UNCAUGHT TASK:', data)
@@ -37,8 +43,8 @@ wss.on('connection', function connection(ws) {
       bot.end();
     }
   }
+  comms = ws;
 
-  connect(ws)
 });
 
 
@@ -49,27 +55,27 @@ let mineflayer = require('mineflayer');
 let bot = null;
 const sleep = ms => new Promise((resolve) => setTimeout(resolve, ms))
 
-async function connect(ws) {
+async function startBot() {
   console.log('createBot:', process.env.createBot)
 
   bot = mineflayer.createBot(JSON.parse(process.env.createBot));
   
-  bot.on('error', ws.echo);
-  bot.on('kicked', ws.echo);
+  bot.on('error', comms.echo);
+  bot.on('kicked', comms.echo);
 
   bot.once('spawn', function() {
     //startPotionEffectsTimer();
-    ws.json({ task: 'heartbeat', event: 'start' });
-    ws.json({ task: 'card', username: bot.username });
+    comms.json({ task: 'heartbeat', event: 'start' });
+    comms.json({ task: 'card', username: bot.username });
   });
 
   bot.on('health', function() {
-    ws.json({ task: 'card', health: bot.health, hunger: bot.food })
+    comms.json({ task: 'card', health: bot.health, hunger: bot.food })
   });
 
   bot.on('end', function(reason) {
-    ws.json({ task: 'heartbeat', event: 'end' })
-    ws.echo(`\n[[u;indianred;]MinePrompt - Session Ended]\n  ${reason}`)
+    comms.json({ task: 'heartbeat', event: 'end' })
+    comms.echo(`\n[[u;indianred;]MinePrompt - Session Ended]\n  ${reason}`)
   });
 
   bot.on('kicked', function(reason) {
@@ -77,17 +83,17 @@ async function connect(ws) {
     let field = json.text || json.translate;
     let message = field; // TODO: Patch ChatMessage.toAnsi
     //let message = ChatMessage.fromNotch(field).toAnsi(bot.registry.language, ansiMap)
-    ws.echo(`\n[[u;indianred;]MinePrompt - Session Kicked]\n  "${message}"`)
+    comms.echo(`\n[[u;indianred;]MinePrompt - Session Kicked]\n  "${message}"`)
   });
 
   let lastPosition;
   bot.on('move', function() {
     if(lastPosition && bot.entity.position.floored().equals(lastPosition.floored())) return;
     lastPosition = bot.entity.position;
-    ws.json({ task: 'card', position: bot.entity.position.floored() })
+    comms.json({ task: 'card', position: bot.entity.position.floored() })
   });
 
   bot.on('messagestr', function(message) {
-    ws.echo(message || '\n' ); // If a server sends a blank line use \n
+    comms.echo(message || '\n' ); // If a server sends a blank line use \n
   });
 }
