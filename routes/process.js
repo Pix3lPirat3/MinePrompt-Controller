@@ -16,6 +16,15 @@ router.get('/get', function(req, res, next) {
   res.json({ child: child.pid })
 });
 
+// Get the websocket connections, for refreshing page, or reconnecting if the website fails (but bots stay up)
+router.get('/fetch', function(req, res, next) {
+
+  let sessions = child_processes.map(ch => ({ env: ch.env, port: ch.pid }));
+
+  // TODO: Respond with data for createBot to pass to card
+  res.json({ sessions: sessions })
+});
+
 router.put('/send', function(req, res, next) {
   let { pid, command } = req.body;
 
@@ -27,12 +36,14 @@ router.put('/send', function(req, res, next) {
 // Start a child process
 router.put('/create', function(req, res, next) {
 
+  let environment = JSON.stringify(req.body);
   let child = fork(path.resolve('./child_process/client.js'), [], {
      stdio: [ 'inherit', 'inherit', 'inherit', 'ipc' ],
      env: Object.assign(process.env, {
-       createBot: JSON.stringify(req.body)
+       createBot: environment
      })
   })
+  child.env = req.body;
 
   child_processes.push(child)
 
