@@ -10,9 +10,10 @@ var http = require('http');
 
 /**
  * Get port from environment and store in Express.
+ * Set custom port with 'npm run start --port=1234'
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.npm_config_port || '3000');
 app.set('port', port);
 
 /**
