@@ -1,23 +1,36 @@
 class Card {
 
-constructor(client_options) {
+// Pass a Process ID for continuing an existing session only!
+constructor(client_options, pid) {
   this.username = client_options.username;
   this.client_options = client_options;
+  this.pid = pid;
 }
 
 async startChild() {
   this.generateCard()
-
   let parent = this;
 
-  let pid = (await $.ajax({ url: './process/create', type: 'PUT', data: this.client_options })).child;
+  // Continuing Existing Session
 
-  this.term.echo(`[Connection] Opening a connection on port ${pid}`)
+  let newSession = this.pid ? false : true;
+  console.log('New Session?', newSession);
+  if(this.pid) {
+    this.term.debug(`[Connection] Reconnecting an existing session on port ${this.pid}`)
+    parent.socket = new WebSocket(`ws://localhost:${this.pid}`);
+  }
 
-  this.socket = new WebSocket(`ws://localhost:${pid}`);
+  // New Session
+  if(!this.pid) {
+    let socket = parent.socket;
+    parent.pid = (await $.ajax({ url: './process/create', type: 'PUT', data: this.client_options })).child;
+    this.term.debug(`[Connection] Creating a new session on port ${this.pid}`)
+    parent.socket = new WebSocket(`ws://localhost:${this.pid}`);
+  }
 
   this.socket.onopen = function(e) {
-    parent.term.echo(`[Connection] Established a connection with process ${pid}`)
+    parent.term.debug(`[Connection] Established a connection with websocket ${parent.pid}`)
+    if(newSession) parent.socket.send(JSON.stringify({ task: 'startBot' }))
   };
 
   // Server (Child Process) sends a message to the terminal
@@ -44,13 +57,15 @@ async startChild() {
   };
 
   this.socket.onclose = function(event) {
+    console.log('onclose:', event)
     parent.term.echo('Connection Terminated:')
     if (event.wasClean) return parent.term.echo(`${event.code}: ${event.reason}`);
     parent.term.echo('Process Terminated - The connection was terminated (Check Errors)');
   };
 
   this.socket.onerror = function(error) {
-    parent.term.echo(`[Connection] There was an error with the connection: ${error}`)
+    console.log('onerror:', error)
+    parent.term.echo(`[Connection] There was an error with the connection: ${error.code}`)
   };
 
 }
@@ -66,11 +81,18 @@ parseCommand(input, term) {
   var parsed_command = $.terminal.parse_command(input);
   let cmd = parsed_command.name;
   let args = parsed_command.args;
+
+  // Command Logic (Web Side - less logic)
+  // TODO: Add (Yargs?) command system
+
   if(cmd === 'exit') this.removeCard();
   this.socket.send(JSON.stringify({ task: 'command', cmd: cmd, args: args }))
 }
 
 generateCard() {
+
+  // TODO: Get element from findByElement, but HOW DO I GET TERM??
+
   let parent = this;
   //let pid = this.pid;
   this.elCard = $("#player-card").clone().prop('id', '').insertAfter("#player-card:last");
@@ -84,7 +106,7 @@ generateCard() {
   elCard.find('.avatar-body').attr('src', `https://mc-heads.net/body/${this.username.toLowerCase()}/100/nohelm.png`);
   function createTerminal() {
       let element = elCard.find('.terminal');
-      return element.terminal(function(command, term) {
+      let term = element.terminal(function(command, term) {
           parent.parseCommand(command, term)
       }, {
           exit: false,
@@ -104,6 +126,13 @@ generateCard() {
           prompt: '\u00bb ',
           scrollOnEcho: false
       });
+
+      term.debug = function(message) {
+        // TODO: Create per-terminal setting for debug
+        //if(debug) {}
+        term.echo(`[[;indianred;]DEBUG] \u00bb ${message}`)
+      }
+      return term;
   }
   this.term = createTerminal();
   return elCard.show();
