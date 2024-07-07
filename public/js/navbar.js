@@ -25,10 +25,10 @@ let navbar = {
       let servers = (await jQuery.getJSON('./servers/get')).servers;
       elServers.empty();
       servers.sort((a, b) => a.hostname - b.hostname).forEach(function(server) {
-        let { hostname, authentication } = server;
+        let { hostname, port, authentication } = server;
         elServers.append(`
           <li>
-            <div class="dropdown-item" data-hostname="${hostname}" data-auth="${authentication}">
+            <div class="dropdown-item" data-hostname="${hostname}" data-port="${port}" data-auth="${authentication}">
               <img style="height: 25px; margin-right: 5px;">${hostname}
               <span class="delete-account" style="float: right; cursor: pointer; color: indianred; font-weight: bold;">&#10006;</span>
             </div>
@@ -66,6 +66,7 @@ $('#navbarServers').on('click', 'li > .dropdown-item', async function(e) {
   
   let elTarget = $(e.currentTarget);
   let hostname = elTarget.data('hostname');
+  let port = elTarget.data('port');
   let auth = elTarget.data('auth');
 
   if($(e.target).hasClass('delete-account')) {
@@ -74,6 +75,7 @@ $('#navbarServers').on('click', 'li > .dropdown-item', async function(e) {
     return;
   }
 
-  modals.connectAccount.show({ username: '', auth: auth, hostname: hostname  })
+  console.log('Showing: ', auth, hostname, port)
+  modals.connectAccount.show({ username: '', auth: auth, host: hostname, port: port })
  
 })

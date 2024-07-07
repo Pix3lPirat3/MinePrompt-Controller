@@ -23,12 +23,14 @@ $('#connectAccountShowAdvancedSettings').on('click', function(e) {
 let modals = {
   connectAccount: {
     elModal: new bootstrap.Modal('#connectAccount'),
-    show: function({ username, auth }) {
+    show: function({ username, auth, host, port }) {
 
       let el = $(this.elModal._element);
 
       el.find('#connectAccountUsername').val(username);
       el.find('#connectAccountAuth').val(auth);
+      el.find('#connectAccountHost').val(host)
+      el.find('#connectAccountPort').val(port)
       el.find('#connectAccountHead').attr('src', `https://mc-heads.net/head/${username.toLowerCase()}`)
       el.find('#connectAccountSkin').attr('src', `https://mc-heads.net/body/${username.toLowerCase()}`)
 
