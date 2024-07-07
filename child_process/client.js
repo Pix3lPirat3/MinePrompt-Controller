@@ -56,10 +56,8 @@ let bot = null;
 const sleep = ms => new Promise((resolve) => setTimeout(resolve, ms))
 
 async function startBot() {
-  console.log('createBot:', process.env.createBot)
-
   bot = mineflayer.createBot(JSON.parse(process.env.createBot));
-  
+
   bot.on('error', comms.echo);
   bot.on('kicked', comms.echo);
 
@@ -93,7 +91,21 @@ async function startBot() {
     comms.json({ task: 'card', position: bot.entity.position.floored() })
   });
 
-  bot.on('messagestr', function(message) {
-    comms.echo(message || '\n' ); // If a server sends a blank line use \n
+  bot.on('message', function(jsonMsg, position, sender) {
+    if(position == 'chat') {
+      // TODO: Add support for toAnsi() once it's patched for unsigned/signed in prismarine-chat
+
+      let sender_obj = Object.values(bot.players).find(pl => pl.uuid == sender);
+
+      let username = sender_obj.username || 'Unknown Sender'; // If server sends fake player 'Unknown Sender'
+
+      let message = jsonMsg?.unsigned?.toString() || jsonMsg.toString();
+
+      comms.echo(`[[;gold;]\u00bb] ${message}`)
+      // TODO: parse chat commands
+    } else {
+      comms.echo(`[[;gray;]\u00bb] ${jsonMsg.toString()}` || '\n' ); // If a server sends a blank line use \n
+    }
+
   });
 }
