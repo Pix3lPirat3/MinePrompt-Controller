@@ -8,13 +8,15 @@ constructor(client_options, pid) {
 }
 
 async startChild() {
+  // TODO: Check if there's a card already running, ask the user to run 'close'
+  // check if there's an existing player but a dead card, close the dead card / restart it
+
   this.generateCard()
   let parent = this;
 
   // Continuing Existing Session
 
   let newSession = this.pid ? false : true;
-  console.log('New Session?', newSession);
   if(this.pid) {
     this.term.debug(`[Connection] Reconnecting an existing session on port ${this.pid}`)
     parent.socket = new WebSocket(`ws://localhost:${this.pid}`);
@@ -44,10 +46,12 @@ async startChild() {
         parent.updateCard(data)
         break;
       case 'heartbeat':
-        if(data.event === 'start') parent.startRuntime();
-        if(data.event === 'end') parent.stopRuntime();
+        if(data.event === 'start') parent.startRuntime(data.time);
+        if(data.event === 'end') parent.stopRuntime(new Date(data.time));
         break;
       case 'exit':
+        this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
+        // DELETE request for deleting session
         parent.removeCard();
         break;
       default:
@@ -73,7 +77,7 @@ async startChild() {
 removeCard() {
   // TODO: Also send something to SESSIONS SERVER to delete the session
   this.elCard.remove();
-  this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
+  //this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
 }
 
 parseCommand(input, term) {
@@ -181,17 +185,20 @@ setPosition(position) {
   elPosition.text(`${x}, ${y}, ${z}`)
 }
 
-startRuntime() {
-  this.sessionStart = new Date();
+startRuntime(date) {
+  this.sessionStart = new Date(date);
   let parent = this;
+  parent.elRuntime.text(parent.getRuntime()).css('color', '#fff').pulsate('destroy')
   this.timerRuntime = setInterval(function() {
       parent.elRuntime.text(parent.getRuntime()).css('color', '#fff').pulsate('destroy')
     }, 1000)
 }
 
-stopRuntime() {
+stopRuntime(date) {
   clearInterval(this.timerRuntime)
   if(!this.elRuntime.text().length) this.elRuntime.text('NaN'); // timer not started
+  let runtimeText = date ? this.getRuntime(date) : 'NaN';
+  this.elRuntime.text(runtimeText)
   this.elRuntime.prepend('Connection Ended: ').pulsate({
     color: '#cd5c5c',
     reach: 5,
@@ -203,8 +210,9 @@ stopRuntime() {
   }).css('color', 'indianred');
 }
 
-getRuntime() {
-  let seconds_passed = Math.abs(this.sessionStart.getTime() - new Date().getTime()) / 1000;
+getRuntime(until) {
+  let end = until ? until.getTime() : new Date().getTime();
+  let seconds_passed = Math.abs(this.sessionStart.getTime() - end) / 1000;
   return this.forHumans(seconds_passed);
 }
 

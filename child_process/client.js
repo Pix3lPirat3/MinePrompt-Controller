@@ -3,6 +3,10 @@
 
 const WebSocket = require('ws');
 const wss = new WebSocket.Server({ port: process.pid });
+let runtime = {
+  start: null,
+  end: null
+}
 
 let comms = null;
 
@@ -45,6 +49,10 @@ wss.on('connection', function connection(ws) {
   }
   comms = ws;
 
+  // On page refresh, send the start/end time for the runtime
+  if(runtime.start) comms.json({ task: 'heartbeat', event: 'start', time: runtime.start });
+  if(runtime.end) comms.json({ task: 'heartbeat', event: 'end', time: runtime.end });
+
 });
 
 
@@ -63,7 +71,8 @@ async function startBot() {
 
   bot.once('spawn', function() {
     //startPotionEffectsTimer();
-    comms.json({ task: 'heartbeat', event: 'start' });
+    runtime.start = new Date();
+    comms.json({ task: 'heartbeat', event: 'start', time: runtime.start });
     comms.json({ task: 'card', username: bot.username });
   });
 
@@ -72,7 +81,8 @@ async function startBot() {
   });
 
   bot.on('end', function(reason) {
-    comms.json({ task: 'heartbeat', event: 'end' })
+    runtime.end = new Date();
+    comms.json({ task: 'heartbeat', event: 'end', time: runtime.end })
     comms.echo(`\n[[u;indianred;]MinePrompt - Session Ended]\n  ${reason}`)
   });
 
