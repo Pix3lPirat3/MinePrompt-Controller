@@ -172,7 +172,7 @@
           <div class="modal-body">
 
             <div class="mb-3" style="text-align: center;">
-              <img id="addAccountSkin" src="https://mc-heads.net/body/" style="text-align: center; height: 150px">
+              <img id="addAccountSkin" src="" style="text-align: center; height: 150px">
             </div>
 
             <div id="addAccountErrors" class="mb-2" style="color: indianred;"></div>
@@ -327,7 +327,7 @@
           <div class="modal-body">
 
             <div class="mb-3" style="text-align: center;">
-              <img id="addAccountSkin" src="https://mc-heads.net/body/" style="text-align: center; height: 150px">
+              <img id="addAccountSkin" src="" style="text-align: center; height: 150px">
             </div>
 
             <div id="addAccountErrors" class="mb-2" style="color: indianred;"></div>
@@ -386,6 +386,7 @@
           let player_card = new Card(session.env, session.port);
           player_card.startChild();
         })
+        console.log('sessions:', sessions)
       }
       getSession();
 

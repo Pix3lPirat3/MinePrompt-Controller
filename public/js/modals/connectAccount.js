@@ -20,6 +20,11 @@ $('#connectAccountShowAdvancedSettings').on('click', function(e) {
   $('#connectAccountAdvancedSettings').toggle();
 })
 
+let render_types = ['default', 'marching', 'walking', 'crouching', 'crossed', 'criss_cross', 'ultimate', 'isometric', 'head', 'cheering', 'relaxing', 'trudging', 'cowering', 'pointing', 'lunging', 'dungeons', 'facepalm', 'sleeping', 'dead', 'archer', 'kicking', 'mojavatar', 'reading', 'bitzel', 'pixel'];
+function getRenderType() {
+  return render_types[Math.floor(Math.random() * render_types.length)];
+}
+
 let modals = {
   connectAccount: {
     elModal: new bootstrap.Modal('#connectAccount'),
@@ -27,12 +32,14 @@ let modals = {
 
       let el = $(this.elModal._element);
 
+
+
       el.find('#connectAccountUsername').val(username);
       el.find('#connectAccountAuth').val(auth);
       el.find('#connectAccountHost').val(host)
       el.find('#connectAccountPort').val(port)
-      el.find('#connectAccountHead').attr('src', `https://mc-heads.net/head/${username.toLowerCase()}`)
-      el.find('#connectAccountSkin').attr('src', `https://mc-heads.net/body/${username.toLowerCase()}`)
+      el.find('#connectAccountHead').attr('src', `https://starlightskins.lunareclipse.studio/render/${getRenderType()}/${username.toLowerCase()}/full`)
+      el.find('#connectAccountSkin').attr('src', `https://starlightskins.lunareclipse.studio/render/${getRenderType()}/${username}/full`)
 
       return this.elModal.show();
     },
@@ -46,8 +53,8 @@ let modals = {
 $('#connectAccountUsername').on('keyup', function() {
   let username = $(this).val();
   if(!isValidUsername(username)) return;
-  $('#connectAccountHead').attr('src', `https://mc-heads.net/head/${username.toLowerCase()}`)
-  $('#connectAccountSkin').attr('src', `https://mc-heads.net/body/${username.toLowerCase()}`)
+  $('#connectAccountHead').attr('src', `https://starlightskins.lunareclipse.studio/render/${getRenderType()}/${username}/full`)
+  $('#connectAccountSkin').attr('src', `https://starlightskins.lunareclipse.studio/render/${getRenderType()}/${username}/full`)
 })
 
 let accounts = {

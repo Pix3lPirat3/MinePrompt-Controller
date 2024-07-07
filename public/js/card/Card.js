@@ -103,8 +103,8 @@ generateCard() {
 
   //elCard.attr('data-pid', this.pid)
   elCard.find('[data-fill="username"]').text(this.username)
-  elCard.find('.avatar-head').attr('src', `https://mc-heads.net/avatar/${this.username.toLowerCase()}/100/nohelm.png`);
-  elCard.find('.avatar-body').attr('src', `https://mc-heads.net/body/${this.username.toLowerCase()}/100/nohelm.png`);
+  elCard.find('.avatar-head').attr('src', `https://starlightskins.lunareclipse.studio/render/${getRenderType()}/${this.username}/full`);
+  elCard.find('.avatar-body').attr('src', `https://starlightskins.lunareclipse.studio/render/${getRenderType()}/${this.username}/full`);
   function createTerminal() {
       let element = elCard.find('.terminal');
       let term = element.terminal(function(command, term) {
@@ -142,7 +142,7 @@ generateCard() {
 
 updateCard(data) {
   if(data.username) this.elCard.find('[data-fill="username"]').text(data.username);
-  if(data.username) this.elCard.find('.avatar').attr('src', `https://mc-heads.net/avatar/${data.username.toLowerCase()}/100/nohelm.png`);
+  if(data.username) this.elCard.find('.avatar').attr('src', `https://starlightskins.lunareclipse.studio/render/${getRenderType()}/${data.username}/full`);
   if(data.health) this.setHealth(data.health);
   if(data.hunger) this.setHunger(data.hunger);
   if(data.effects) this.setEffects(data.effects);

@@ -24,7 +24,7 @@ $('#addAccountUsername').on('keyup', function() {
   let username = $(this).val();
   if(!isValidUsername(username)) return;
   let elSkin = $('#addAccountSkin');
-  elSkin.attr('src', `https://mc-heads.net/body/${username.toLowerCase()}`)
+  elSkin.attr('src', `https://starlightskins.lunareclipse.studio/render/${getRenderType()}/${username}/full`)
 })
 
 function isValidUsername(username) {
