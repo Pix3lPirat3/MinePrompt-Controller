@@ -71,6 +71,7 @@ async startChild() {
 }
 
 removeCard() {
+  // TODO: Also send something to SESSIONS SERVER to delete the session
   this.elCard.remove();
   this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
 }
