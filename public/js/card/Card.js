@@ -50,7 +50,7 @@ async startChild() {
         if(data.event === 'end') parent.stopRuntime(new Date(data.time));
         break;
       case 'exit':
-        this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
+        //this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
         // DELETE request for deleting session
         parent.removeCard();
         break;
@@ -77,7 +77,9 @@ async startChild() {
 removeCard() {
   // TODO: Also send something to SESSIONS SERVER to delete the session
   this.elCard.remove();
-  //this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
+  this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
+  this.socket.close();
+  $.ajax({ url: './process/delete', type: 'DELETE', data: { pid: parent.pid } })
 }
 
 parseCommand(input, term) {
@@ -140,6 +142,23 @@ generateCard() {
       return term;
   }
   this.term = createTerminal();
+
+  elCard.on('click', '#btnReconnect', function(e) {
+    console.log('Reconnecting the child!')
+
+    parent.term.echo('Reconnecting your client in 5000ms (5s)..')
+    setTimeout(function() {
+      parent.removeCard();
+      let player_card = new Card(parent.client_options);
+      player_card.startChild();
+    }, 5000)
+
+  })
+
+  elCard.on('click', '#btnTerminate', function(e) {
+    parent.removeCard();
+  })
+
   return elCard.show();
 
 }
@@ -186,6 +205,7 @@ setPosition(position) {
 }
 
 startRuntime(date) {
+  console.log('startRuntime:', date)
   this.sessionStart = new Date(date);
   let parent = this;
   parent.elRuntime.text(parent.getRuntime()).css('color', '#fff').pulsate('destroy')
@@ -195,9 +215,11 @@ startRuntime(date) {
 }
 
 stopRuntime(date) {
+  console.log('stopRuntime:', date)
+  let parent = this;
   clearInterval(this.timerRuntime)
-  if(!this.elRuntime.text().length) this.elRuntime.text('NaN'); // timer not started
-  let runtimeText = date ? this.getRuntime(date) : 'NaN';
+  //if(!this.elRuntime.text().length) this.elRuntime.text('NaN'); // timer not started
+  let runtimeText = this.sessionStart ? this.getRuntime(date) : 'Unsuccessful';
   this.elRuntime.text(runtimeText)
   this.elRuntime.prepend('Connection Ended: ').pulsate({
     color: '#cd5c5c',
