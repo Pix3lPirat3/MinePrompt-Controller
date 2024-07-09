@@ -33,6 +33,15 @@ router.put('/send', function(req, res, next) {
   res.json({ temp: 'idk what to respond with' })
 })
 
+router.delete('/delete', function(req, res, next) {
+  let { pid } = req.body;
+  console.log('Deleting session #' + pid);
+
+  child_processes.splice(child_processes.findIndex(obj => obj.pid === pid), 1)
+
+  res.json({ msg: 'Use a response about successful or not found, I dunno'})
+});
+
 // Start a child process
 router.put('/create', function(req, res, next) {
 
