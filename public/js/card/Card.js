@@ -53,6 +53,7 @@ async startChild() {
         //this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
         // DELETE request for deleting session
         parent.removeCard();
+        parent.endSession();
         break;
       default:
         console.log('UNCAUGHT DATA:', data)
@@ -77,6 +78,9 @@ async startChild() {
 removeCard() {
   // TODO: Also send something to SESSIONS SERVER to delete the session
   this.elCard.remove();
+}
+
+endSession() {
   this.socket.send(JSON.stringify({ task: 'command', cmd: 'exit' }))
   this.socket.close();
   $.ajax({ url: './process/delete', type: 'DELETE', data: { pid: parent.pid } })
@@ -87,13 +91,16 @@ parseCommand(input, term) {
 
   var parsed_command = $.terminal.parse_command(input);
   let cmd = parsed_command.name;
-  let args = parsed_command.args;
+  //let args = parsed_command.args;
 
   // Command Logic (Web Side - less logic)
   // TODO: Add (Yargs?) command system
 
-  if(cmd === 'exit') this.removeCard();
-  this.socket.send(JSON.stringify({ task: 'command', cmd: cmd, args: args }))
+  if(cmd === 'exit') {
+    this.removeCard();
+    this.endSession();
+  }
+  this.socket.send(JSON.stringify({ task: 'command', cmd: cmd, message: input }))
 }
 
 generateCard() {
@@ -146,7 +153,8 @@ generateCard() {
   elCard.on('click', '#btnReconnect', function(e) {
     console.log('Reconnecting the child!')
 
-    parent.term.echo('Reconnecting your client in 5000ms (5s)..')
+    parent.endSession();
+    parent.term.echo('Reconnecting your client in 5s..')
     setTimeout(function() {
       parent.removeCard();
       let player_card = new Card(parent.client_options);
