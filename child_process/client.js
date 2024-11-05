@@ -8,14 +8,45 @@ let runtime = {
   end: null
 }
 
-let comms = null;
+let { CommandManager, Command } = require('./commander');
+
+let cmdMgr = null;
+function setCommandManager(bot) {
+  cmdMgr = new CommandManager(bot)
+  cmdMgr.addCommand(new Command().name('attack').handler((bot) => bot.attack()))
+
+    // Say command
+  let commandSay = new Command();
+  commandSay.name('say');
+  commandSay.alias(['chat', 'speak'])
+  commandSay.handler(function(bot, sender, message, args) {
+    let controller = (sender.type == 'console') ? 'console' : sender.username;
+    bot.chat(controller + ' wants me to say: ' + args.join(' '));
+  })
+  cmdMgr.addCommand(commandSay)
+
+  //let commandHelp = new Command();
+  cmdMgr.addCommandFile(__dirname + '/../commands/java/help.js');
+  //cmdMgr.addCommand(commandHelp)
+  // commandHelp.name('help');
+  // commandHelp.alias(['h', 'menu'])
+  // console.log('DIRNAME:', __dirname) // child_process
+  // commandHelp.handler(__dirname + '/../commands/java/help.js')
+  // cmdMgr.addCommand(commandHelp)
+
+  cmdMgr.startListener()
+
+  console.log('Set the command manager.')
+}
 
 wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
     let data = JSON.parse(message);
     switch(data.task) {
       case 'command':
-        runCommand(data.cmd, data.args)
+        //runCommand(data.cmd, data.args)
+        console.log('command from child:', data.message)
+        cmdMgr.parse({ type: 'console' }, data.message)
         break;
 
       case 'startBot':
@@ -41,10 +72,11 @@ wss.on('connection', function connection(ws) {
     if(cmd === 'exit') {
       bot.end()
       ws.json({ task: 'exit' });
-    }
-    if(cmd === 'disconnect') {
+    } else if(cmd === 'disconnect') {
       ws.echo('Gracefully disconnecting from the server..')
       bot.end();
+    } else {
+      
     }
   }
   comms = ws;
@@ -71,6 +103,7 @@ async function startBot() {
 
   bot.once('spawn', function() {
     //startPotionEffectsTimer();
+    setCommandManager(bot)
     runtime.start = new Date();
     comms.json({ task: 'heartbeat', event: 'start', time: runtime.start });
     comms.json({ task: 'card', username: bot.username });
